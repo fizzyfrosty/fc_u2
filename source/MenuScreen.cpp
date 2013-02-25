@@ -18,6 +18,7 @@ void MenuScreen::Initialize( int16 t )
 	//counter = 0;
 	buttonCount = 0;
 	type = t;
+	// This is the actual pixel size of the image for stretching and tiling purposes
 	sprite.setUWidth( 480 );
 	sprite.setUHeight( 320 );
 	//sprite.setSize( 480, 320 );
@@ -25,7 +26,50 @@ void MenuScreen::Initialize( int16 t )
 	sprite.setImage( image );
 	sprite.setPosition( IwGxGetScreenWidth()/2, -IwGxGetScreenHeight()/2 );
 
-	if( type == CHALLENGE )
+	if( type == MENU )
+	{
+		delete image;
+		image = Iw2DCreateImage("black.png");
+
+		// high score screen has back button, and Rate button
+		buttonCount = 1; // make only 1 button for play for now. Add a 2nd button for credits. More button for more links.
+
+		for( int i = 0; i < buttonCount; i++ )
+		{
+			switch( i )
+			{
+			case 0: // PLAY button
+				buttonImageArray[i] = Iw2DCreateImage("test.png");
+				//buttonImageArray_pressed[i] = Iw2DCreateImage("rateButton_green.png"); // Load only one image for pressed and unpressed.
+				button[i].setLocation( 50, 100 ); // these are irrelevant I believe, because locations are reset in Render()
+				break;
+			case 1: // CREDITS button - // incomplete
+				buttonImageArray[i] = Iw2DCreateImage("backButton_red.png");
+				buttonImageArray_pressed[i] = Iw2DCreateImage("backButton_green.png");
+				button[i].setLocation( 300, 100 );
+				break;
+			}
+			
+			buttonSprite[i].setImage( buttonImageArray[i] );
+			buttonSprite[i].setUWidth( 128 );
+			buttonSprite[i].setUHeight( 128 );
+			//buttonSprite[i].setSize( 64, 64 );
+			buttonSprite[i].setSize( IwGxGetScreenWidth() * .133, IwGxGetScreenWidth() * .133 );
+			
+			//buttonSprite_pressed[i].setImage( buttonImageArray_pressed[i] );	
+			buttonSprite_pressed[i].setImage( buttonImageArray[i] );	
+			buttonSprite_pressed[i].setUWidth( 128 );
+			buttonSprite_pressed[i].setUHeight( 128 );
+			//buttonSprite_pressed[i].setSize( 50, 50 );
+			buttonSprite_pressed[i].setSize( IwGxGetScreenWidth() * .104, IwGxGetScreenWidth() * .104 );
+
+			button[i].setUnpressedSprite( buttonSprite[i] );
+			button[i].setPressedSprite( buttonSprite_pressed[i] );
+			//button[i].setTouchSize( 64, 64 );
+			button[i].setTouchSize( IwGxGetScreenWidth() * .133, IwGxGetScreenWidth() * .133 );
+		}
+	}
+	else if( type == CHALLENGE )
 	{
 		int row = 1;
 		int column = 1;
@@ -472,15 +516,25 @@ void MenuScreen::Initialize( int16 t )
 
 void MenuScreen::Terminate()
 {
-	delete image; 
+	if( image != NULL )
+	{
+		delete image; 
+	}
 
 	for( int i = 0; i < buttonCount; i++ )
 	{
 		//delete buttonImage[i];
 		//delete buttonImage_pressed[i];
 
-		delete buttonImageArray[i];
-		delete buttonImageArray_pressed[i];
+		if( buttonImageArray[i] != NULL )
+		{
+			delete buttonImageArray[i];
+		}
+
+		if( buttonImageArray[i] != NULL )
+		{
+			delete buttonImageArray_pressed[i];
+		}
 	}
 
 	/*
@@ -526,7 +580,26 @@ void MenuScreen::Render()
 {
 	sprite.Render();
 
-	if( type == CHALLENGE )
+	if( type == MENU )
+	{
+		for( int i = 0; i < buttonCount; i++ )
+		{
+			switch( i )
+			{
+			case 0:
+				//button[i].setLocation( sprite.position.x - 75, sprite.position.y + 122 );
+				button[i].setLocation( sprite.position.x - IwGxGetScreenWidth() * .156, sprite.position.y + IwGxGetScreenHeight() * .381 );
+				break;
+			case 1:
+				//button[i].setLocation( sprite.position.x + 15, sprite.position.y + 122 );
+				button[i].setLocation( sprite.position.x + IwGxGetScreenWidth() * .031, sprite.position.y + IwGxGetScreenHeight() * .381 );				
+				break;
+			}
+
+			button[i].Render();
+		}
+	}
+	else if( type == CHALLENGE )
 	{
 		int row = 1;
 		int column = 1;

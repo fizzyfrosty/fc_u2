@@ -6,6 +6,16 @@ Version Number: Major.minor.build
 1.1.0 - 2/19/12
 1.0.0 - 2/6/12
 
+2/25/13
+General Changes:
+	- Removed all videos
+	- Episodes end at episode 1.
+	- Code that was removed or commented out is labeled as '// out'
+	- Created the Menu MenuScreen. 
+		- Will need to replace current 3d menu screen with 2d menu screen.
+		- Will need to link functionality of play to test button.
+		- Test.
+
 
 5/22/12
 General Changes:
@@ -32223,39 +32233,6 @@ void LoadMenuData()
 	//swipeArrowsSprite.setPosition( IwGxGetScreenWidth()/2, IwGxGetScreenHeight() - 32 );
 	swipeArrowsSprite.setPosition( width/2, height * .9 );
 
-	/*
-	for( int i = 0; i < 4; i++ )
-	{
-		switch( i )
-		{
-		case 0:
-			swipeArrowsImages[i] = Iw2DCreateImage("swipeArrows3.png");DisplayLoading();
-			break;
-		case 1:
-			swipeArrowsImages[i] = Iw2DCreateImage("swipeArrows2.png");DisplayLoading();
-			break;
-		case 2:
-			swipeArrowsImages[i] = Iw2DCreateImage("swipeArrows1.png");DisplayLoading();			
-			break;
-		case 3:
-			swipeArrowsImages[i] = Iw2DCreateImage("swipeArrows4.png");DisplayLoading();			
-			break;
-		}
-		
-		swipeArrowsSprites[i].setImage( swipeArrowsImages[i] );
-		swipeArrowsSprites[i].setDelayTime( 1 );
-		swipeArrowsSprites[i].setSize( 512/2, 128/2 );
-		swipeArrowsSprites[i].setUWidth( 512 );
-		swipeArrowsSprites[i].setUHeight( 128 );
-		swipeArrowsSprites[i].setPosition( IwGxGetScreenWidth()/2, IwGxGetScreenHeight() - 32 );
-		swipeArrowsSprites[i].setTotalFrames( 16 );
-		if( i == 3 )
-		{
-			swipeArrowsSprites[i].setTotalFrames( 11 );
-		}
-		swipeArrowsSprites[i].setRepeatCount( 1 );
-	}
-	*/
 	
 	menuTitleImage4 = Iw2DCreateImage("menuTitleShiny4.png");DisplayLoading();
 	//menuTitleImage = Iw2DCreateImageResource("menuTitle");
@@ -32304,30 +32281,6 @@ void LoadMenuData()
 	int32 heapUsed2 = s3eMemoryGetInt(S3E_MEMORY_USED); // Free memory minus heap size
 	printf("Finished Loading Menu data. Memory loaded was %d \n", heapUsed2 - heapUsed );
 	
-	
-	/*
-	menuTitleImage = Iw2DCreateImage("test.png");DisplayLoading();
-	menuTitleSprite.setImage( menuTitleImage );
-	menuTitleSprite.setDelayTime( 2 ); // wait half a second
-	menuTitleSprite.setSize( 480, 128 );
-	menuTitleSprite.setUWidth( 128 );
-	menuTitleSprite.setUHeight( 128 );
-	//menuTitleSprite.setTotalFrames( 15 );
-	menuTitleSprite.setRepeatCount( 1 );
-
-	menuTitleImage2 = Iw2DCreateImage("test.png");DisplayLoading();
-	menuTitleSprite2.setImage( menuTitleImage2 );
-	menuTitleSprite2.setDelayTime( 2 ); // wait half a second
-	menuTitleSprite2.setSize( 480, 128 );
-	menuTitleSprite2.setUWidth( 128 );
-	menuTitleSprite2.setUHeight( 128 );
-	//menuTitleSprite2.setTotalFrames( 14 );
-	menuTitleSprite2.setRepeatCount( 1 );
-	*/
-
-
-	//menuTitleSprite.playAnimation = false ;
-	//menuTitleSprite2.playAnimation = false;
 	
 } // end of loadmenudata()
 
