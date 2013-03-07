@@ -40,6 +40,7 @@ void TouchButton::Render()
 		{
 			unpressedSprite.setPosition( x, y );
 			unpressedSprite.Render();
+
 		}
 		else if( pressed == true )
 		{

@@ -6,6 +6,17 @@ Version Number: Major.minor.build
 1.1.0 - 2/19/12
 1.0.0 - 2/6/12
 
+2/28/13
+General Changes:	
+	- Upgraded/downgraded to marmalade sdk 6.0.3
+	- Removed all menu data, loading, terminating, and rendering
+	- Menu Screen created.
+		- Only one play button plus one background exists
+
+Next:
+	- Remove the menu assets from the mkb
+	- 
+
 2/25/13
 General Changes:
 	- Removed all videos
@@ -2090,7 +2101,7 @@ MenuScreen questionMarkScreen;
 bool showQuestionMarkScreen = false;
 
 MenuScreen challengeMenuScreen;
-const int NUM_OF_MENU_SCREENS = 4;
+const int NUM_OF_MENU_SCREENS = 1; // used to be 4
 MenuScreen menuScreen[NUM_OF_MENU_SCREENS];
 const int NUM_OF_TROPHIES = 5;
 bool trophies[NUM_OF_TROPHIES];
@@ -3900,35 +3911,13 @@ void MultiTouchButton( s3ePointerTouchEvent* event )
 				}
 				else // regular menu buttons
 				{
-					// Reset Menu Cubes for Swiping
-					for( int i = 0; i < numOfActiveMenuCubes; i++ )
+					if( menuScreen[0].button[0].isPressed( x1, y1 ) )
 					{
-						menuCubes[i].releaseSwipe();
-					}
-					deltaX1 = 0;
-					deltaX1Two = 0;
-
-					// Pressing Menu Buttons
-					for( int i = 0; i < numOfActiveMenuCubes; i++ )
-					{
-						if( showQuestionMarkScreen == false )
-						{
-							if( menuCubes[i].isTouched( x1, y1 ) )
-							{
-								menuCubes[i].button.initialPressed = true;
-								menuCubes[i].button.pressed = true;
-								break; // break out of loop searching for menu cubes once one is touched
-							}
-						}
-						else
-						{
-							showQuestionMarkScreen = false;
-							ResetMenuButtonBobble();
-						}
+						menuScreen[0].button[0].initialPressed = true;
+						menuScreen[0].button[0].pressed = true;
 					}
 				}
-
-			} // end of if game state == at menu
+			}
 			else if( GameState == PLAY_GAME )
 			{
 				rotateEnabled = true;
@@ -4782,31 +4771,10 @@ void SingleTouchButton( s3ePointerTouchEvent* event )
 			}
 			else // regular menu buttons
 			{
-				// Reset Menu Cubes for Swiping
-				for( int i = 0; i < numOfActiveMenuCubes; i++ )
+				if( menuScreen[0].button[0].isPressed( x1, y1 ) )
 				{
-					menuCubes[i].releaseSwipe();
-				}
-				deltaX1 = 0;
-				deltaX1Two = 0;
-
-				// Pressing Menu Buttons
-				for( int i = 0; i < numOfActiveMenuCubes; i++ )
-				{
-					if( showQuestionMarkScreen == false )
-					{
-						if( menuCubes[i].isTouched( x1, y1 ) )
-						{
-							menuCubes[i].button.initialPressed = true;
-							menuCubes[i].button.pressed = true;
-							break; // break out of loop searching for menu cubes once one is touched
-						}
-					}
-					else
-					{
-						showQuestionMarkScreen = false;
-						ResetMenuButtonBobble();
-					}
+					menuScreen[0].button[0].initialPressed = true;
+					menuScreen[0].button[0].pressed = true;
 				}
 			}
 		}
@@ -5623,7 +5591,7 @@ void MultiTouchMotion( s3ePointerTouchMotionEvent* event )
 	}
 
 	if( GameState == AT_MENU )
-	{
+	{	
 		if( enableNewStoryConfirmationScreen == true )
 		{
 			for( int i = 0; i < newStoryConfirmationScreen.buttonCount; i++ )
@@ -5640,17 +5608,13 @@ void MultiTouchMotion( s3ePointerTouchMotionEvent* event )
 		}
 		else // regular menu buttons
 		{
-			// Pressing Menu Buttons
-			for( int i = 0; i < numOfActiveMenuCubes; i++ )
+			if( menuScreen[0].button[0].initialPressed == true && menuScreen[0].button[0].isPressed( motionX1, motionY1) )
 			{
-				if( menuCubes[i].button.initialPressed == true && menuCubes[i].isTouched( motionX1, motionY1 ) )
-				{
-					menuCubes[i].button.pressed = true;
-				}
-				else
-				{
-					menuCubes[i].button.pressed = false;
-				}
+				menuScreen[0].button[0].pressed = true;
+			}
+			else
+			{
+				menuScreen[0].button[0].pressed = false;
 			}
 		}
 	}
@@ -6091,17 +6055,13 @@ void SingleTouchMotion( s3ePointerMotionEvent* event )
 			}
 			else // regular menu buttons
 			{
-				// Pressing Menu Buttons
-				for( int i = 0; i < numOfActiveMenuCubes; i++ )
+				if( menuScreen[0].button[0].initialPressed == true && menuScreen[0].button[0].isPressed( motionX1, motionY1) )
 				{
-					if( menuCubes[i].button.initialPressed == true && menuCubes[i].isTouched( motionX1, motionY1 ) )
-					{
-						menuCubes[i].button.pressed = true;
-					}
-					else
-					{
-						menuCubes[i].button.pressed = false;
-					}
+					menuScreen[0].button[0].pressed = true;
+				}
+				else
+				{
+					menuScreen[0].button[0].pressed = false;
 				}
 			}
 		}
@@ -6553,14 +6513,14 @@ void Init()
 		if(s3eDeviceGetInt (S3E_DEVICE_OS) == S3E_OS_ID_IPHONE)
 		{
 			//s3eFlurryStart("SBI85EBKAWR1ETK5CCW9");
-			s3eFlurryStart("1DNJ3QW7TP76YSIHYJNL"); // Fuzzy Cubes SD iPhone
+			//s3eFlurryStart("1DNJ3QW7TP76YSIHYJNL"); // Fuzzy Cubes SD iPhone
 			printf("Started Flurry...\n");
 		}
 		// Android Applicaton Key
 		else if(s3eDeviceGetInt (S3E_DEVICE_OS) == S3E_OS_ID_ANDROID)
 		{
 			//s3eFlurryStart("HD4EZJ147ELQAT9H43KM"); 
-			s3eFlurryStart("AH7QWHV6BTVC11TBY3ZX");// Fuzzy Cubes SD Android
+			//s3eFlurryStart("AH7QWHV6BTVC11TBY3ZX");// Fuzzy Cubes SD Android
 		}
 		// Playbook
 	}
@@ -7277,15 +7237,15 @@ bool Update()
 				// ENTER the target state by fading in
 				GameState = TargetState;
 				
-				if( TargetState == AT_SPLASH )
+				if( GameState == AT_SPLASH )
 				{
 					transitionObject.setTransition( TransitionObject::BLACK, TransitionObject::FADEIN, 1000 );
 				}
-				else if( TargetState == AT_TITLE )
+				else if( GameState == AT_TITLE )
 				{
 					transitionObject.setTransition( TransitionObject::BLACK, TransitionObject::FADEIN, 1000 );
 				}
-				else if( TargetState == AT_MENU )
+				else if( GameState == AT_MENU )
 				{
 					transitionObject.setTransition( TransitionObject::BLACK, TransitionObject::FADEIN, 1000 );
 
@@ -7299,7 +7259,7 @@ bool Update()
 						}
 					}
 				}
-				else if( TargetState == AT_LOADING_MENU )
+				else if( GameState == AT_LOADING_MENU )
 				{
 					transitionObject.setTransition( TransitionObject::WHITE, TransitionObject::FADEIN, 1000 );
 					
@@ -7324,7 +7284,7 @@ bool Update()
 						}
 					}
 				}
-				else if( TargetState == AT_LOADING_LEVEL ) // If coming from restart, unload all data so fresh data can be reloaded for ep1 tutorial images
+				else if( GameState == AT_LOADING_LEVEL ) // If coming from restart, unload all data so fresh data can be reloaded for ep1 tutorial images
 				{
 					transitionObject.setTransition( TransitionObject::WHITE, TransitionObject::FADEIN, 1000 );
 
@@ -7335,11 +7295,11 @@ bool Update()
 						levelDataLoaded = false;
 					}
 				}
-				else if( TargetState == AT_TUTORIAL_MENU_SCREEN )
+				else if( GameState == AT_TUTORIAL_MENU_SCREEN )
 				{
 					transitionObject.setTransition( TransitionObject::WHITE, TransitionObject::FADEIN, 1000 );
 				}
-				else if( TargetState == AT_SCORE_SCREEN )
+				else if( GameState == AT_SCORE_SCREEN )
 				{
 					transitionObject.setTransition( TransitionObject::WHITE, TransitionObject::FADEIN, 1000 );
 
@@ -7371,7 +7331,8 @@ bool Update()
 						printf("Failed to set pixie to be shown.\n");
 					}
 				}
-				else if( TargetState == PLAY_CINEMATIC ) 
+				// Should do a check for GameState, b/c it is now target state
+				else if( GameState == PLAY_CINEMATIC ) 
 				{
 					if( fuzzyFactImage != NULL )
 					{
@@ -7642,7 +7603,7 @@ bool Update()
 						} // end of switch( episode )
 					}
 				}
-				else if( TargetState == PLAY_GAME ) // enter GAME from cinematic
+				else if( GameState == PLAY_GAME ) // enter GAME from cinematic
 				{
 					transitionObject.setTransition( TransitionObject::WHITE, TransitionObject::FADEIN, 1000 );
 					// score screen
@@ -7796,7 +7757,7 @@ bool Update()
 						}
 						break;						
 					} // end of switch( episode )
-				} // end of if targetState == play_game				
+				} // end of if GameState == play_game				
 
 			}
 		}
@@ -10800,8 +10761,6 @@ void Render()
 	// Clear the screen
 	IwGxClear(IW_GX_COLOUR_BUFFER_F | IW_GX_DEPTH_BUFFER_F);
 
-	
-
 	// lighting
 	if( episode == 3 )
 	{
@@ -10966,6 +10925,11 @@ void Render()
 		IwGxFontPrepareText( difficultyData, difficultyChar);
 		IwGxFontDrawText( difficultyData );
 	}
+	else if( GameState == AT_MENU )
+	{
+		menuScreen[0].Render();
+	}
+	/*
 	else if( GameState == AT_MENU || 
 		GameState == AT_CHALLENGE_MENU_SCREEN ||
 		GameState == AT_HIGH_SCORE_MENU_SCREEN ||
@@ -11054,23 +11018,8 @@ void Render()
 			questionMarkScreen.Render();
 		}
 
-		/*
-		// show iAd - move this from not in menu, but into game
-		if( hasIAd == true )
-		{
-			if( s3eIOSIAdGetInt( S3E_IOSIAD_RUNNING ) == 1 &&  s3eIOSIAdGetInt( S3E_IOSIAD_BANNER_LOADED ) == 1 )
-			{
-				s3eIOSIAdSetInt( S3E_IOSIAD_BANNER_SHOW, 1 );
-			}
-			else
-			{
-				s3eIOSIAdSetInt( S3E_IOSIAD_BANNER_SHOW, 0 );
-			}
-		}
-		*/
-
 		// also ping a website for connection to see if iAd should continue rendering
-	} // end of AT_MENU
+	} // end of AT_MENU*/
 	else if( GameState == PLAY_GAME || GameState == PLAY_TUTORIAL || GameState == PAUSED || GameState == AT_SCORE_SCREEN ) // render the game regardless of paused or not
 	{
 
@@ -13050,51 +12999,6 @@ void Render()
 		newStoryConfirmationScreen.Render();
 	}
 	
-	if( GameState == AT_CHALLENGE_MENU_SCREEN || GameState == AT_MENU )
-	{
-		menuScreen[0].Render();
-	}
-	if( GameState == AT_HIGH_SCORE_MENU_SCREEN || GameState == AT_MENU )
-	{
-		menuScreen[1].Render();	
-		IwGxFlush();
-		
-		if( showTrophyMessage == true )
-		{
-			trophyMessageBackgroundSprite.Render();
-			IwGxFlush();
-
-			
-			// Create the text descriptions for obtaining trophies
-			IwGxFontSetCol(0xffccffff); // yellow, when setting it's abgr
-			//Set the formatting rect - this controls where the text appears and what it is formatted against
-			//IwGxFontSetRect( CIwRect(0, IwGxGetScreenHeight()/2 - 50, IwGxGetScreenWidth(), IwGxGetScreenHeight()) );
-			IwGxFontSetRect( CIwRect(0, IwGxGetScreenHeight()/2 - height*.156, IwGxGetScreenWidth(), IwGxGetScreenHeight()) );
-			CIwGxFontPreparedData trophyData;
-		
-			// trophyCString located in release high score buttons
-
-			//Draw the text - just for testing. replaced with images!
-			//IwGxFontPrepareText( trophyData, trophyCString);
-			//IwGxFontDrawText( trophyData );
-
-			// render trophy message sprite
-			// show trophy message sprite
-			if( showTrophyMessage == true )
-			{
-				trophyMessageSprite.Render();
-			}
-			// the image of the sprite is set in release of trophy buttons
-		}
-	}
-	if( GameState == AT_CREDITS_MENU_SCREEN || GameState == AT_MENU )
-	{
-		menuScreen[2].Render();
-	}
-	if( GameState == AT_TUTORIAL_MENU_SCREEN || GameState == AT_MENU )
-	{
-		menuScreen[3].Render();
-	}
 
 	// render transition
 	if( renderTransition == true )
@@ -20236,269 +20140,40 @@ void ReleaseDifficultyButtons()
 
 void ReleaseMenuButtons()
 {
-	for( int i = 0; i < numOfActiveMenuCubes; i++ )
+	if( menuScreen[0].button[0].pressed == true && limbo == false )
 	{
-		if( menuCubes[i].type == MenuCube::NEW ) // load QFI
-		{
-			if( menuCubes[i].button.pressed == true && limbo == false)
-			{
-				// Activates Game
-
-				if( targetEpisode != 1 || (targetEpisode == 1 && startAtCheckpoint == true) )
-				{
-					enableNewStoryConfirmationScreen = true;
-
-					// flurry log play
-					if( hasFlurry )
-					{
-						char cstring[50] = "Pressed Menu-Play";
-						s3eFlurryLogEvent( cstring, false );
-					}
-
-					menuCubes[i].continueBobble = true;
-				}
-				else
-				{
-					// load levels
-					storyMode = true;				
-					// transition to loading levels. load when transition is finished
-					TargetState = AT_LOADING_LEVEL;
-					transition = true;				
-					transitionIsSet = false;
+		// load levels
+		storyMode = true;				
+		// transition to loading levels. load when transition is finished
+		TargetState = AT_LOADING_LEVEL;
+		transition = true;				
+		transitionIsSet = false;
 				
-					//GameState = AT_LOADING_LEVEL;
-					targetEpisode = 1;
-					levelNumber = 1;
-					scoreLivesBonusBucket = 0;
-					limbo = true;
+		//GameState = AT_LOADING_LEVEL;
+		targetEpisode = 1;
+		levelNumber = 1;
+		scoreLivesBonusBucket = 0;
+		limbo = true;
 
-					// checkpoint
-					startAtCheckpoint = false;
+		// checkpoint
+		startAtCheckpoint = false;
 
-					Save(); // this saves the state
+		Save(); // this saves the state
 
-					menuCubes[i].continueBobble = true;
 
-					// flurry log play
-					if( hasFlurry )
-					{
-						char cstring[50] = "Pressed Menu-Play";
-						s3eFlurryLogEvent( cstring, false );
-					}
-
-					// set tutorial watch
-					playedHowToTutorialOnce = false;
-					playedBombTutorialOnce = false;
-					playedWarningTutorialOnce = false;
-				}
-			}
-		}
-		else if( menuCubes[i].type == MenuCube::CONTINUE )
+		// flurry log play
+		if( hasFlurry )
 		{
-			if( menuCubes[i].button.pressed == true && limbo == false)
-			{
-				// Activates Game
-
-				// load levels
-				storyMode = true;
-				// transition to loading levels. load when transition is finished
-				TargetState = AT_LOADING_LEVEL;
-				transition = true;				
-				transitionIsSet = false;
-				
-				//GameState = AT_LOADING_LEVEL;
-				//targetEpisode = 1; this was already loaded. use this for New game. this release is Continue game for now
-				//levelNumber = 1;
-				//livesGained = 0;
-				limbo = true;
-				levelNumber = 1; // this is important for initialization. targetEpisode is already loaded
-
-				menuCubes[i].continueBobble = true;
-
-				// flurry log continue
-				if( hasFlurry )
-				{
-					char cstring[50] = "Pressed Menu-Continue";
-					s3eFlurryLogEvent( cstring, false );
-				}
-			}
+			char cstring[50] = "Pressed Menu-Play";
+			s3eFlurryLogEvent( cstring, false );
 		}
-		/*
-		else if( menuCubes[i].type ==  MenuCube::TUTORIAL ) // load tutorial
-		{
-			if( menuCubes[i].button.pressed == true )
-			{
-				GameState = AT_LOADING_TUTORIAL;
-			}
-		}
-		else if( menuCubes[i].type ==  MenuCube::CREDITS ) // load iads
-		{
-			if( menuCubes[i].button.pressed == true )
-			{
-				//LoadBigImages();
-				// initialize iAd
-				s3eInetAddress addr;
-				if( s3eInetLookup( "www.apple.com", &addr, NULL, NULL) == S3E_RESULT_ERROR )
-				{
-					printf("\n\n Lookup failed!! \n");
-				}
-				else
-				{
-					if( hasIAd == true )
-					{
-						s3eIOSIAdStart();				
-					}
-				}
-			}
-		}
-		else if( menuCubes[i].type ==  MenuCube::HIGH_SCORE ) // close iads, load developerLevels
-		{
-			if( menuCubes[i].button.pressed == true )
-			{
-				if( hasIAd == true ) //initialize high score screen
-				{
-					if( s3eIOSIAdGetInt( S3E_IOSIAD_RUNNING ) == 1 )
-					{
-						if( s3eIOSIAdGetInt( S3E_IOSIAD_BANNER_LOADED ) == 1 )
-						{
-							s3eIOSIAdSetInt( S3E_IOSIAD_BANNER_SHOW, 0 );
-						}
-						s3eIOSIAdStop();
-					}
-				}
-				developerLevels = true;
-				planeSpawning = DOUBLE_ADJACENT;
-				cubeSpawning = DOUBLE_INCOLOR;
-				INITIAL_SPEED = 800;
-				GameState = AT_LOADING_LEVEL;
-			}
-		}
-		*/
-		else if( menuCubes[i].type ==  MenuCube::CHALLENGE ) // load challenge menu
-		{
-			if( menuCubes[i].button.pressed == true )
-			{
-				menuScreen[0].setStartingPosition( IwGxGetScreenWidth()/2, -IwGxGetScreenHeight()/2 );
-				menuScreen[0].setEndingPosition( IwGxGetScreenWidth()/2, IwGxGetScreenHeight()/2 );
-				menuScreen[0].setInterpolationTime( 500 );
-				menuScreen[0].setDeceleration( 100, -2);
-				GameState = AT_CHALLENGE_MENU_SCREEN;
-
-				menuCubes[i].continueBobble = true;
-			}
-		}
-		else if( menuCubes[i].type ==  MenuCube::HIGH_SCORE ) // load challenge menu
-		{
-			if( menuCubes[i].button.pressed == true )
-			{
-				menuScreen[1].setStartingPosition( IwGxGetScreenWidth()/2, -IwGxGetScreenHeight()/2 );
-				menuScreen[1].setEndingPosition( IwGxGetScreenWidth()/2, IwGxGetScreenHeight()/2 );
-				menuScreen[1].setInterpolationTime( 500 );
-				menuScreen[1].setDeceleration( 100, -2);
-				GameState = AT_HIGH_SCORE_MENU_SCREEN;
-
-				menuCubes[i].continueBobble = true;
-
-				// flurry log highscore
-				if( hasFlurry )
-				{
-					char cstring[50] = "Pressed Menu-HighScore";
-					s3eFlurryLogEvent( cstring, false );
-				}
-			}
-		}
-		else if( menuCubes[i].type ==  MenuCube::CREDITS ) // load challenge menu
-		{
-			if( menuCubes[i].button.pressed == true )
-			{
-				menuScreen[2].setStartingPosition( IwGxGetScreenWidth()/2, -IwGxGetScreenHeight()/2 );
-				menuScreen[2].setEndingPosition( IwGxGetScreenWidth()/2, IwGxGetScreenHeight()/2 );
-				menuScreen[2].setInterpolationTime( 500 );
-				menuScreen[2].setDeceleration( 100, -2);
-				GameState = AT_CREDITS_MENU_SCREEN;
-
-				menuCubes[i].continueBobble = true;
-
-				// flurry log credits
-				if( hasFlurry )
-				{
-					char cstring[50] = "Pressed Menu-Credits";
-					s3eFlurryLogEvent( cstring, false );
-				}
-			}
-		}
-		else if( menuCubes[i].type ==  MenuCube::TUTORIAL ) // load challenge menu
-		{
-			if( menuCubes[i].button.pressed == true )
-			{
-				menuScreen[3].setStartingPosition( IwGxGetScreenWidth()/2, -IwGxGetScreenHeight()/2 );
-				menuScreen[3].setEndingPosition( IwGxGetScreenWidth()/2, IwGxGetScreenHeight()/2 );
-				menuScreen[3].setInterpolationTime( 500 );
-				menuScreen[3].setDeceleration( 100, -2);
-				GameState = AT_TUTORIAL_MENU_SCREEN;
-
-				menuCubes[i].continueBobble = true;
-
-				// flurry log highscore
-				if( hasFlurry )
-				{
-					char cstring[50] = "Pressed Menu-Tutorial";
-					s3eFlurryLogEvent( cstring, false );
-				}
-			}
-		}
-		else if( menuCubes[i].type == MenuCube::RAP_RECORD )
-		{
-			if( menuCubes[i].button.pressed == true && limbo == false)
-			{
-				if( trophies[4] == true )
-				{
-					TargetState = PLAY_CINEMATIC;
-					transition = true;				
-					transitionIsSet = false;
-
-					limbo = true;
-
-					// play rap video
-					playingRapVideoFromMenu = true;
-
-					menuCubes[i].continueBobble = true;
-					
-				}
-
-				// flurry log question mark
-				if( hasFlurry )
-				{
-					char cstring[50] = "Pressed Menu-Play Rap Video";
-					s3eFlurryLogEvent( cstring, false );
-				}
-			}
-		}
-		else if( menuCubes[i].type == MenuCube::QUESTION_MARK )
-		{
-			if( menuCubes[i].button.pressed == true && limbo == false)
-			{
-				showQuestionMarkScreen = true;
-				menuCubes[i].continueBobble = true;
-
-				// flurry log question mark
-				if( hasFlurry )
-				{
-					char cstring[50] = "Pressed Menu-Question Mark";
-					s3eFlurryLogEvent( cstring, false );
-				}
-			}
-		}
+		
 	}
 
-
-	// release all variables and states
-
-	for( int i = 0; i < numOfActiveMenuCubes; i++ )
-	{
-		menuCubes[i].button.pressed = false;
-		menuCubes[i].button.initialPressed = false;
-	}
+	// Release all variables
+	menuScreen[0].button[0].initialPressed = false;
+	menuScreen[0].button[0].pressed = false;
+	
 } // end of ReleaseMenuButtons()
 
 void ResetMenuButtonBobble()
@@ -32073,6 +31748,13 @@ void LoadMenuData()
 	fuzzyFactSprite.setSize( width, height );
 	fuzzyFactSprite.setPosition( width/2, height/2 );
 
+	menuScreen[0].Initialize( MenuScreen::MENU );DisplayLoading();
+	
+	int32 heapUsed2 = s3eMemoryGetInt(S3E_MEMORY_USED); // Free memory minus heap size
+	printf("Finished Loading Menu data. Memory loaded was %d \n", heapUsed2 - heapUsed );
+
+	/*
+
 	// initialize menuscreens
 	for( int i = 0; i < NUM_OF_MENU_SCREENS; i++ )
 	{
@@ -32280,7 +31962,7 @@ void LoadMenuData()
 
 	int32 heapUsed2 = s3eMemoryGetInt(S3E_MEMORY_USED); // Free memory minus heap size
 	printf("Finished Loading Menu data. Memory loaded was %d \n", heapUsed2 - heapUsed );
-	
+	*/
 	
 } // end of loadmenudata()
 
@@ -32300,36 +31982,6 @@ void TerminateMenuData()
 	for( int i = 0; i < NUM_OF_MENU_SCREENS; i++ )
 	{
 		menuScreen[i].Terminate();
-	}
-
-	newStoryConfirmationScreen.Terminate();
-
-	questionMarkScreen.Terminate();
-	
-	for( int i = 0; i < numOfActiveMenuCubes; i++ )
-	{
-		menuCubes[i].Terminate();
-	}
-	Bubbly.Terminate();
-	delete trophyMessageBackgroundImage;
-	for( int i = 0; i < NUM_OF_TROPHY_MESSAGE_IMAGES; i++ )
-	{
-		delete trophyMessageImage[i];
-	}
-
-	delete swipeGlowImage;
-	delete swipeArrowsImage;
-
-	//IwGetResManager()->DestroyGroup("menuData");
-
-	delete menuTitleImage;
-	delete menuTitleImage2;
-	delete menuTitleImage3;
-	delete menuTitleImage4;
-
-	for( int i = 0; i < 4; i++ )
-	{
-		//delete swipeArrowsImages[i];
 	}
 	
 	int32 heapUsed2 = s3eMemoryGetInt(S3E_MEMORY_USED); // Free memory minus heap size

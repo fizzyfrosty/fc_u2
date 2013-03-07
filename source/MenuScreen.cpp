@@ -24,12 +24,13 @@ void MenuScreen::Initialize( int16 t )
 	//sprite.setSize( 480, 320 );
 	sprite.setSize( IwGxGetScreenWidth(), IwGxGetScreenHeight() );
 	sprite.setImage( image );
-	sprite.setPosition( IwGxGetScreenWidth()/2, -IwGxGetScreenHeight()/2 );
+	sprite.setPosition( IwGxGetScreenWidth()/2, -IwGxGetScreenHeight()/2 ); // menu screen position spawns off-screen by default!!!
 
 	if( type == MENU )
 	{
 		delete image;
 		image = Iw2DCreateImage("black.png");
+		sprite.setPosition( IwGxGetScreenWidth()/2, IwGxGetScreenHeight()/2 );
 
 		// high score screen has back button, and Rate button
 		buttonCount = 1; // make only 1 button for play for now. Add a 2nd button for credits. More button for more links.
@@ -588,7 +589,7 @@ void MenuScreen::Render()
 			{
 			case 0:
 				//button[i].setLocation( sprite.position.x - 75, sprite.position.y + 122 );
-				button[i].setLocation( sprite.position.x - IwGxGetScreenWidth() * .156, sprite.position.y + IwGxGetScreenHeight() * .381 );
+				button[i].setLocation( sprite.position.x, sprite.position.y);
 				break;
 			case 1:
 				//button[i].setLocation( sprite.position.x + 15, sprite.position.y + 122 );
