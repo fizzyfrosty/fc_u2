@@ -22,6 +22,7 @@
 #include "TransitionObject.h"
 #include "WindSystem.h"
 #include "SaveFile.h"
+#include "IntroFrame.h"
 
 #include "IwGraphics.h"
 #include "IwModel.h"

@@ -1576,7 +1576,9 @@ void SaveTutorialPlayed();
 void SaveTargetEpisode(); // for restarting an episode
 void LoadBackgroundAndOtherInit();
 void LoadMenuData();
+void LoadScrollingIntro();
 void TerminateMenuData();
+void TerminateScrollingIntro();
 void LoadLevelData();
 void TerminateLevelData();
 void LoadTutorialData();
@@ -1590,6 +1592,9 @@ bool triggeredLoadingCallback = false;
 
 int32 loadingMenuCallback( void* systemData, void *userData );
 bool triggeredLoadingMenuCallback = false;
+
+int32 loadingScrollingIntroCallback( void* systemData, void *userData );
+bool triggeredLoadingScrollingIntroCallback = false;
 
 // tutorial functions
 int32 triggerShowTutorialTouchDrag( void *systemData, void *userData );
@@ -2103,6 +2108,8 @@ bool showQuestionMarkScreen = false;
 MenuScreen challengeMenuScreen;
 const int NUM_OF_MENU_SCREENS = 1; // used to be 4
 MenuScreen menuScreen[NUM_OF_MENU_SCREENS];
+IntroFrame introFrame;
+
 const int NUM_OF_TROPHIES = 5;
 bool trophies[NUM_OF_TROPHIES];
 char trophyCString[200]; // this is the description of how to get the trophies
@@ -2265,7 +2272,9 @@ enum {
 	AT_DISPLAY_MENU_TRANSITION, 
 	AT_DISPLAY_LOADING_MENU,
 	AT_LOADING_MENU,
+	AT_LOADING_SCROLLING_INTRO,
 	AT_MENU, 
+	AT_SCROLLING_INTRO,
 	AT_LOADING_LEVEL, 
 	PLAY_GAME, 
 	PLAY_CINEMATIC,
@@ -6989,6 +6998,45 @@ bool Update()
 		}
 	}
 
+	if( GameState == AT_SCROLLING_INTRO )
+	{
+		if( transition == false ) // if completely finished transitioning, start moving the screen
+		{
+			introFrame.play();
+		}
+
+		introFrame.update();
+
+		if( introFrame.ended == true && TargetState == GameState )
+		{
+			// go into game
+			// load levels
+			storyMode = true;				
+			// transition to loading levels. load when transition is finished
+			TargetState = AT_LOADING_LEVEL;
+			transition = true;				
+			transitionIsSet = false;
+				
+			//GameState = AT_LOADING_LEVEL;
+			targetEpisode = 1;
+			levelNumber = 1;
+			scoreLivesBonusBucket = 0;
+			limbo = true;
+
+			// checkpoint
+			startAtCheckpoint = false;
+
+			Save(); // this saves the state
+
+			// flurry log play
+			if( hasFlurry )
+			{
+				char cstring[50] = "Pressed Menu-Play";
+				s3eFlurryLogEvent( cstring, false );
+			}
+		}
+	}
+
 	// Update Transitions
 	if( transition == true )
 	{
@@ -7020,6 +7068,27 @@ bool Update()
 
 			// Exiting Menu, entering loading screen
 			if( GameState == AT_MENU && TargetState == AT_LOADING_LEVEL )
+			{
+				// white fadein from menu > loading screen
+				transitionObject.setTransition( TransitionObject::WHITE, TransitionObject::FADEOUT, 1000 );
+			}
+
+			// Exiting Menu, entering loading scrolling intro
+			if( GameState == AT_MENU && TargetState == AT_LOADING_SCROLLING_INTRO )
+			{
+				// white fadein from menu > loading screen
+				transitionObject.setTransition( TransitionObject::WHITE, TransitionObject::FADEOUT, 1000 );
+			}
+
+			// Exiting loading scrolling intro, entering scrolling intro
+			if( GameState == AT_LOADING_SCROLLING_INTRO && TargetState == AT_SCROLLING_INTRO )
+			{
+				// white fadein from menu > loading screen
+				transitionObject.setTransition( TransitionObject::WHITE, TransitionObject::FADEOUT, 1000 );
+			}
+
+			// Exiting scrolling intro, entering loading level
+			if( GameState == AT_SCROLLING_INTRO && TargetState == AT_LOADING_LEVEL )
 			{
 				// white fadein from menu > loading screen
 				transitionObject.setTransition( TransitionObject::WHITE, TransitionObject::FADEOUT, 1000 );
@@ -7259,6 +7328,13 @@ bool Update()
 						}
 					}
 				}
+				else if( GameState == AT_SCROLLING_INTRO )
+				{
+					transitionObject.setTransition( TransitionObject::WHITE, TransitionObject::FADEIN, 1000 );
+
+					// No need to do anything here. ScrollingIntro should automatically render at this GameState.
+					// It will start moving when finished
+				}
 				else if( GameState == AT_LOADING_MENU )
 				{
 					transitionObject.setTransition( TransitionObject::WHITE, TransitionObject::FADEIN, 1000 );
@@ -7281,6 +7357,20 @@ bool Update()
 						{
 							TerminateEpisode( i+1 );
 							sphereLoaded[i] = false;
+						}
+					}
+				}
+				else if( GameState == AT_LOADING_SCROLLING_INTRO )
+				{
+					transitionObject.setTransition( TransitionObject::WHITE, TransitionObject::FADEIN, 1000 );
+
+					triggeredLoadingScrollingIntroCallback = false;
+					// play music
+					if( musicOn )
+					{
+						if( s3eAudioPlay("fuzzytheme.mp3", 0) == S3E_RESULT_ERROR )
+						{
+							printf("Error with playing background music.\n");
 						}
 					}
 				}
@@ -7874,6 +7964,8 @@ bool Update()
 		{
 			TerminateMenuData();
 			menuDataTerminated = true;
+
+			TerminateScrollingIntro();
 		}
 
 		if( splashAndTitleTerminated == false )
@@ -7978,7 +8070,6 @@ bool Update()
 		}
 		*/
 
-
 		if( triggeredLoadingMenuCallback == false )
 		{
 			if( s3eTimerSetTimer( 3000, loadingMenuCallback, 0 ) != S3E_RESULT_SUCCESS )
@@ -7990,7 +8081,22 @@ bool Update()
 				triggeredLoadingMenuCallback = true;
 			}
 		}
-	}	
+		
+	}
+	if( GameState == AT_LOADING_SCROLLING_INTRO )
+	{
+		if( triggeredLoadingScrollingIntroCallback == false )
+		{
+			if( s3eTimerSetTimer( 3000, loadingScrollingIntroCallback, 0 ) != S3E_RESULT_SUCCESS )
+			{
+				printf("loading scrolling intro callback failed.\n");
+			}
+			else
+			{
+				triggeredLoadingScrollingIntroCallback = true;
+			}
+		}
+	}
 	
 	// Camera Transform and Bobble matrices
 	if( GameState == AT_MENU || (GameState == PLAY_GAME) || GameState == PLAY_TUTORIAL )
@@ -10802,6 +10908,10 @@ void Render()
 	{
 		DisplayLoadingWithoutRefresh();
 	}
+	else if( GameState == AT_LOADING_SCROLLING_INTRO )
+	{
+		DisplayLoadingWithoutRefresh();
+	}
 	else if( GameState == AT_LOADING_LEVEL )
 	{
 		DisplayLoadingWithoutRefresh();
@@ -10928,6 +11038,10 @@ void Render()
 	else if( GameState == AT_MENU )
 	{
 		menuScreen[0].Render();
+	}
+	else if( GameState == AT_SCROLLING_INTRO )
+	{
+		introFrame.render();
 	}
 	/*
 	else if( GameState == AT_MENU || 
@@ -20142,6 +20256,11 @@ void ReleaseMenuButtons()
 {
 	if( menuScreen[0].button[0].pressed == true && limbo == false )
 	{
+		TargetState = AT_LOADING_SCROLLING_INTRO;
+		transition = true;
+		transitionIsSet = false;
+
+		/*
 		// load levels
 		storyMode = true;				
 		// transition to loading levels. load when transition is finished
@@ -20160,13 +20279,13 @@ void ReleaseMenuButtons()
 
 		Save(); // this saves the state
 
-
 		// flurry log play
 		if( hasFlurry )
 		{
 			char cstring[50] = "Pressed Menu-Play";
 			s3eFlurryLogEvent( cstring, false );
 		}
+		*/
 		
 	}
 
@@ -31719,7 +31838,6 @@ void LoadMenuData()
 	LoadSaveFile();
 
 	menuDataTerminated = false;	
-
 	int32 heapUsed = s3eMemoryGetInt(S3E_MEMORY_USED); // Free memory minus heap size
 
 	// load fuzzy fact sprite and image
@@ -31966,6 +32084,22 @@ void LoadMenuData()
 	
 } // end of loadmenudata()
 
+void LoadScrollingIntro()
+{
+	int32 heapUsed = s3eMemoryGetInt(S3E_MEMORY_USED); // Free memory minus heap size
+
+	// Create the scrolling intro frame
+	introFrame.initialize();DisplayLoading();
+
+	
+	TargetState = AT_SCROLLING_INTRO;
+	transition = true;				
+	transitionIsSet = false;
+
+	int32 heapUsed2 = s3eMemoryGetInt(S3E_MEMORY_USED); // Free memory minus heap size
+	printf("Finished Loading Scrolling Intro data. Memory loaded was %d \n", heapUsed2 - heapUsed );
+}
+
 void TerminateMenuData()
 {	
 	// terminate iad
@@ -31986,6 +32120,16 @@ void TerminateMenuData()
 	
 	int32 heapUsed2 = s3eMemoryGetInt(S3E_MEMORY_USED); // Free memory minus heap size
 	printf("Finished Terminating Menu data. Memory Freed was %d \n", heapUsed2 - heapUsed );
+}
+
+void TerminateScrollingIntro()
+{
+	int32 heapUsed = s3eMemoryGetInt(S3E_MEMORY_USED); // Free memory minus heap size
+			
+	introFrame.terminate();
+
+	int32 heapUsed2 = s3eMemoryGetInt(S3E_MEMORY_USED); // Free memory minus heap size
+	printf("Finished Terminating Scrolling Intro data. Memory Freed was %d \n", heapUsed2 - heapUsed );
 }
 
 void LoadLevelData()
@@ -33487,6 +33631,18 @@ int32 loadingMenuCallback( void* systemData, void *userData )
 		transition = true;
 		transitionIsSet = false;
 		TargetState = AT_MENU;
+	}
+
+	return 0;
+}
+
+int32 loadingScrollingIntroCallback( void* systemData, void *userData )
+{
+	// load menu data after a couple seconds
+	if( transition == false )
+	{
+		// display loading screen
+		LoadScrollingIntro();
 	}
 
 	return 0;

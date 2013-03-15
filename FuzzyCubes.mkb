@@ -63,6 +63,12 @@ files
 
 	SaveFile.h
 	SaveFile.cpp
+
+	IntroPanel.h
+	IntroPanel.cpp
+
+	IntroFrame.h
+	IntroFrame.cpp
 }
 
 assets
