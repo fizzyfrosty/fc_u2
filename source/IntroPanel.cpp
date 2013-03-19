@@ -22,7 +22,11 @@ void IntroPanel::initialize( char *filePath, int16 dir )
 	direction = dir; // directions can only be UP, DOWN, LEFT, RIGHT
 
 	// If the panel is moving upward, spawn it at the center bottom of screen
-	if( direction == UP )
+	if( direction == START )
+	{
+		position = CIwSVec2( IwGxGetScreenWidth()/2, IwGxGetScreenHeight()/2 );
+	}
+	else if( direction == UP )
 	{
 		position = CIwSVec2( IwGxGetScreenWidth()/2, IwGxGetScreenHeight()/2 * 3 );
 	}

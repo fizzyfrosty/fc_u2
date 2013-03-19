@@ -20,7 +20,8 @@ public:
 	Sprite sprite;
 	CIw2DImage *image;
 	
-	enum {UP, DOWN, LEFT, RIGHT};
+	enum {UP, DOWN, LEFT, RIGHT, START}; // these are the directions in which the panels are sliding towards
 	int16 direction;
+	int16 id;
 };
 

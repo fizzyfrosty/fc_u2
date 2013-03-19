@@ -23,6 +23,7 @@
 #include "WindSystem.h"
 #include "SaveFile.h"
 #include "IntroFrame.h"
+#include "IntroPanel.h"
 
 #include "IwGraphics.h"
 #include "IwModel.h"

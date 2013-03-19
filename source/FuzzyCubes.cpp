@@ -6,6 +6,12 @@ Version Number: Major.minor.build
 1.1.0 - 2/19/12
 1.0.0 - 2/6/12
 
+3/18/13
+General Changes:
+	- Added IntroPanels and IntroFrame
+	- Intro Panels now work
+
+
 2/28/13
 General Changes:	
 	- Upgraded/downgraded to marmalade sdk 6.0.3
