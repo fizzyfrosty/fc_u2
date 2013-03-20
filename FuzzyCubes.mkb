@@ -63,6 +63,12 @@ files
 
 	SaveFile.h
 	SaveFile.cpp
+
+	IntroPanel.h
+	IntroPanel.cpp
+
+	IntroFrame.h
+	IntroFrame.cpp
 }
 
 assets
@@ -347,6 +353,7 @@ assets
 	#progressBarLowRes.png
 
 	white.png
+	yellow.png
 	black.png
 
 	trophySprite.png
