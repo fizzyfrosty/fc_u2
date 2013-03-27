@@ -164,7 +164,7 @@ assets
 	(data-ram/data-gles1, data)
 
 
-	(data/textures)	
+	(data/textures)
 
 	rotate.png
 	rotate_pressed.png
@@ -276,10 +276,10 @@ assets
 	#menuButtonHighScore.png
 
 	#menuTitleShinyLowRes.png
-	menuTitleShiny.png
-	menuTitleShiny2.png
-	menuTitleShiny3.png
-	menuTitleShiny4.png
+	#menuTitleShiny.png
+	#menuTitleShiny2.png
+	#menuTitleShiny3.png
+	#menuTitleShiny4.png
 	#menuArrows.png
 
 	questionmarkinfo.png
@@ -383,6 +383,7 @@ assets
 	trophymessage_hero_achieved.png
 	trophymessage_no_connection.png
 	
+	gamecenter_64.png
 }
 
 subproject iwutil
@@ -396,6 +397,7 @@ subprojects
 	iwgxfont
 	s3eIOSIAd
 	s3eFlurry
+	s3eIOSGameCenter
 	#s3eAdWhirl
 }
 
@@ -429,7 +431,7 @@ deployments
 	iphone-icon-ipad-search=data/icon50x50.png
 	#iphone-appid='com.workhorsebytes.fuzzycubes'
 	#iphone-appid='com.workhorsebytes.fuzzycubesuniversal'
-	iphone-appid='com.workhorsebytes.fcu2'
+	iphone-appid='com.workhorsebytes.fuzzycubeslite' #used to test gamecenter
 
 	#for distribution only
 	#iphone-provisioning-profile='data/Fuzzy_Cubes_Distribution_Profile.mobileprovision'
@@ -444,9 +446,9 @@ deployments
 
 
 	#ANDROID
-	version-major='1'
-	version-minor='0'
-	version-revision='0'
+	#version-major='1'
+	#version-minor='0'
+	#version-revision='0'
 
 	android-icon='icon48x48.png'
 	android-icon-hdpi='icon72x72.png'

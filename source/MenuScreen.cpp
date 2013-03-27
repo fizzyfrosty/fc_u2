@@ -33,7 +33,7 @@ void MenuScreen::Initialize( int16 t )
 		sprite.setPosition( IwGxGetScreenWidth()/2, IwGxGetScreenHeight()/2 );
 
 		// high score screen has back button, and Rate button
-		buttonCount = 1; // make only 1 button for play for now. Add a 2nd button for credits. More button for more links.
+		buttonCount = 2; // make only 1 button for play for now. Add a 2nd button for credits. More button for more links.
 
 		for( int i = 0; i < buttonCount; i++ )
 		{
@@ -44,10 +44,10 @@ void MenuScreen::Initialize( int16 t )
 				//buttonImageArray_pressed[i] = Iw2DCreateImage("rateButton_green.png"); // Load only one image for pressed and unpressed.
 				button[i].setLocation( 50, 100 ); // these are irrelevant I believe, because locations are reset in Render()
 				break;
-			case 1: // CREDITS button - // incomplete
-				buttonImageArray[i] = Iw2DCreateImage("backButton_red.png");
-				buttonImageArray_pressed[i] = Iw2DCreateImage("backButton_green.png");
-				button[i].setLocation( 300, 100 );
+			case 1: // High Score Screen button
+				buttonImageArray[i] = Iw2DCreateImage("test.png");
+				//buttonImageArray_pressed[i] = Iw2DCreateImage("backButton_green.png");
+				button[i].setLocation( 300, 100 ); // these are irrelevant I believe, because locations are reset in Render()
 				break;
 			}
 			
@@ -121,7 +121,7 @@ void MenuScreen::Initialize( int16 t )
 			image = Iw2DCreateImage("highscore_screen2.png");
 		}
 		// high score screen has back button, and Rate button
-		buttonCount = 12; // buttons 0-1 are rate, 2-6 are black trophies, 7-11 are trophies
+		buttonCount = 13; // buttons 0-1 are rate, 2-6 are black trophies, 7-11 are trophies, 12 is game center
 
 		for( int i = 0; i < NUM_OF_TROPHIES; i++ )
 		{
@@ -184,7 +184,7 @@ void MenuScreen::Initialize( int16 t )
 			case 5:
 			case 6:
 				buttonImageArray[i] = Iw2DCreateImage("trophyButton_black.png");
-				buttonImageArray_pressed[i] = Iw2DCreateImage("trophyButton_black.png");
+				//buttonImageArray_pressed[i] = Iw2DCreateImage("trophyButton_black.png");
 
 				buttonSprite[i].setImage( buttonImageArray[i] );
 				buttonSprite[i].setUWidth( 100 );
@@ -192,7 +192,7 @@ void MenuScreen::Initialize( int16 t )
 				//buttonSprite[i].setSize( 100, 100 );
 				buttonSprite[i].setSize( IwGxGetScreenWidth() * .208, IwGxGetScreenWidth() * .208 );
 			
-				buttonSprite_pressed[i].setImage( buttonImageArray_pressed[i] );	
+				buttonSprite_pressed[i].setImage( buttonImageArray[i] );	
 				buttonSprite_pressed[i].setUWidth( 100 );
 				buttonSprite_pressed[i].setUHeight( 100 );
 				//buttonSprite_pressed[i].setSize( 80, 80 );
@@ -209,7 +209,7 @@ void MenuScreen::Initialize( int16 t )
 			case 10:
 			case 11: // all the REGULAR TROPHY buttons
 				buttonImageArray[i] = Iw2DCreateImage("trophyButton.png");
-				buttonImageArray_pressed[i] = Iw2DCreateImage("trophyButton.png");
+				//buttonImageArray_pressed[i] = Iw2DCreateImage("trophyButton.png");
 
 				buttonSprite[i].setImage( buttonImageArray[i] );
 				buttonSprite[i].setUWidth( 64 );
@@ -217,7 +217,7 @@ void MenuScreen::Initialize( int16 t )
 				//buttonSprite[i].setSize( 64, 64 );
 				buttonSprite[i].setSize( IwGxGetScreenWidth() * .133, IwGxGetScreenWidth() * .133 );
 			
-				buttonSprite_pressed[i].setImage( buttonImageArray_pressed[i] );	
+				buttonSprite_pressed[i].setImage( buttonImageArray[i] );	
 				buttonSprite_pressed[i].setUWidth( 64 );
 				buttonSprite_pressed[i].setUHeight( 64 );
 				//buttonSprite_pressed[i].setSize( 50, 50 );
@@ -228,6 +228,29 @@ void MenuScreen::Initialize( int16 t )
 				//button[i].setTouchSize( 64, 64 );
 				button[i].setTouchSize( IwGxGetScreenWidth() * .133, IwGxGetScreenWidth() * .133 );
 				break;
+			case 12: // GameCenter button
+
+				buttonImageArray[i] = Iw2DCreateImage("gamecenter_64.png");
+				//buttonImageArray_pressed[i] = Iw2DCreateImage("trophyButton.png");
+
+				buttonSprite[i].setImage( buttonImageArray[i] );
+				buttonSprite[i].setUWidth( 64 );
+				buttonSprite[i].setUHeight( 64 );
+				//buttonSprite[i].setSize( 64, 64 );
+				buttonSprite[i].setSize( IwGxGetScreenWidth() * .133, IwGxGetScreenWidth() * .133 );
+			
+				buttonSprite_pressed[i].setImage( buttonImageArray[i] );	
+				buttonSprite_pressed[i].setUWidth( 64 );
+				buttonSprite_pressed[i].setUHeight( 64 );
+				//buttonSprite_pressed[i].setSize( 50, 50 );
+				buttonSprite_pressed[i].setSize( IwGxGetScreenWidth() * .104, IwGxGetScreenWidth() * .104 );
+
+				button[i].setUnpressedSprite( buttonSprite[i] );
+				button[i].setPressedSprite( buttonSprite_pressed[i] );
+				//button[i].setTouchSize( 64, 64 );
+				button[i].setTouchSize( IwGxGetScreenWidth() * .133, IwGxGetScreenWidth() * .133 );
+				break;
+
 			}
 		}
 
@@ -589,11 +612,11 @@ void MenuScreen::Render()
 			{
 			case 0:
 				//button[i].setLocation( sprite.position.x - 75, sprite.position.y + 122 );
-				button[i].setLocation( sprite.position.x, sprite.position.y);
+				button[i].setLocation( sprite.position.x, sprite.position.y); // The sprite is the center of the image
 				break;
 			case 1:
-				//button[i].setLocation( sprite.position.x + 15, sprite.position.y + 122 );
-				button[i].setLocation( sprite.position.x + IwGxGetScreenWidth() * .031, sprite.position.y + IwGxGetScreenHeight() * .381 );				
+				//button[i].setLocation( sprite.position.x + IwGxGetScreenWidth() * .031, sprite.position.y + IwGxGetScreenHeight() * .381 );				
+				button[i].setLocation( sprite.position.x, sprite.position.y + IwGxGetScreenHeight() * .381 );				
 				break;
 			}
 
@@ -717,6 +740,11 @@ void MenuScreen::Render()
 						button[i].Render();
 					}
 					break;
+				case 12:
+					//button[i].setLocation( sprite.position.x + 187, sprite.position.y + 45 );
+					button[i].setLocation( sprite.position.x + IwGxGetScreenWidth() * 0, sprite.position.y +  IwGxGetScreenHeight() * .381);
+					button[i].Render();
+					break;
 				}
 			}
 		} // end of if OS is iphone, and rendering trophies
@@ -732,7 +760,7 @@ void MenuScreen::Render()
 					button[i].setLocation( -IwGxGetScreenWidth() * 2, IwGxGetScreenHeight() );
 					button[i].Render();
 					break;
-				case 1:
+				case 1: // BACK button
 					//button[i].setLocation( sprite.position.x + 97, sprite.position.y + 122 );
 					button[i].setLocation( sprite.position.x + IwGxGetScreenWidth() * .202, sprite.position.y +  IwGxGetScreenHeight() * .381);
 					button[i].Render();
@@ -821,6 +849,11 @@ void MenuScreen::Render()
 					{
 						button[i].Render();
 					}
+					break;
+				case 12:
+					//button[i].setLocation( sprite.position.x + 187, sprite.position.y + 45 );
+					button[i].setLocation( sprite.position.x + IwGxGetScreenWidth() * 0, sprite.position.y +  IwGxGetScreenHeight()*.381);
+					button[i].Render();
 					break;
 				}
 			}

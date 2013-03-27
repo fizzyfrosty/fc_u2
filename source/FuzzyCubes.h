@@ -35,6 +35,7 @@
 #include "s3eSocket.h"
 #include "s3eExt_OSExec.h"
 #include "s3eFlurry.h"
+#include "s3eGameCenter.h"
 //#include "s3eAdWhirl.h"
 
 #include "IwGxFont.h"

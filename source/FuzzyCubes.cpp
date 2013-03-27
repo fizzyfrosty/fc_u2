@@ -1553,6 +1553,10 @@ int32 resetPointPerkSound(void *systemData, void *userData) ; // reset land soun
 int32 ShowIAD(void *systemData, void *userData);
 int32 HideIAD(void *systemData, void *userData);
 
+// Game Center
+void AuthenticationCallback(s3eIOSGameCenterError* error, void* userData);
+void LoadLeaderboardCallback(s3eIOSGameCenterError* error, void* userData);
+
 // QFI Functions
 void ResetMultitaskingCurrent();
 void ResetMultitasking();
@@ -2113,9 +2117,10 @@ MenuScreen questionMarkScreen;
 bool showQuestionMarkScreen = false;
 
 MenuScreen challengeMenuScreen;
-const int NUM_OF_MENU_SCREENS = 1; // used to be 4
+const int NUM_OF_MENU_SCREENS = 2; // used to be 4. 1 is main, 2 is high score
 MenuScreen menuScreen[NUM_OF_MENU_SCREENS];
 IntroFrame introFrame;
+bool pullHighScoreScreen = false;
 
 const int NUM_OF_TROPHIES = 5;
 bool trophies[NUM_OF_TROPHIES];
@@ -2488,6 +2493,9 @@ CIw2DImage* loadingIconImage;
 
 Sprite fuzzyFactsSprites[3];
 CIw2DImage *fuzzyFactsImages[3];
+
+// Game Center
+bool gameCenterDidAttemptLoading = false; // ensures game center only attempts to authenticate once per session
 
 // Fuzzy Facts
 Sprite fuzzyFactSprite;
@@ -3932,6 +3940,11 @@ void MultiTouchButton( s3ePointerTouchEvent* event )
 						menuScreen[0].button[0].initialPressed = true;
 						menuScreen[0].button[0].pressed = true;
 					}
+					else if( menuScreen[0].button[1].isPressed( x1, y1 ) )
+					{
+						menuScreen[0].button[1].initialPressed = true;
+						menuScreen[0].button[1].pressed = true;
+					}
 				}
 			}
 			else if( GameState == PLAY_GAME )
@@ -4792,6 +4805,11 @@ void SingleTouchButton( s3ePointerTouchEvent* event )
 					menuScreen[0].button[0].initialPressed = true;
 					menuScreen[0].button[0].pressed = true;
 				}
+				else if( menuScreen[0].button[1].isPressed( x1, y1 ) )
+				{
+					menuScreen[0].button[1].initialPressed = true;
+					menuScreen[0].button[1].pressed = true;
+				}
 			}
 		}
 		else if( GameState == PLAY_GAME )
@@ -5632,6 +5650,15 @@ void MultiTouchMotion( s3ePointerTouchMotionEvent* event )
 			{
 				menuScreen[0].button[0].pressed = false;
 			}
+
+			if( menuScreen[0].button[1].initialPressed == true && menuScreen[0].button[1].isPressed( motionX1, motionY1) )
+			{
+				menuScreen[0].button[1].pressed = true;
+			}
+			else
+			{
+				menuScreen[0].button[1].pressed = false;
+			}
 		}
 	}
 	else if( GameState == PLAY_GAME )
@@ -6078,6 +6105,15 @@ void SingleTouchMotion( s3ePointerMotionEvent* event )
 				else
 				{
 					menuScreen[0].button[0].pressed = false;
+				}
+				
+				if( menuScreen[0].button[1].initialPressed == true && menuScreen[0].button[1].isPressed( motionX1, motionY1) )
+				{
+					menuScreen[0].button[1].pressed = true;
+				}
+				else
+				{
+					menuScreen[0].button[1].pressed = false;
 				}
 			}
 		}
@@ -11047,9 +11083,19 @@ void Render()
 		IwGxFontPrepareText( difficultyData, difficultyChar);
 		IwGxFontDrawText( difficultyData );
 	}
-	else if( GameState == AT_MENU )
+	else if( GameState == AT_MENU || GameState == AT_HIGH_SCORE_MENU_SCREEN )
 	{
 		menuScreen[0].Render();
+
+		if( pullHighScoreScreen == true )
+		{
+			menuScreen[1].Render();
+
+			if( menuScreen[1].sprite.interpolateTranslation == false && GameState == AT_MENU )
+			{
+				pullHighScoreScreen = false;
+			}
+		}
 	}
 	else if( GameState == AT_SCROLLING_INTRO )
 	{
@@ -19319,181 +19365,15 @@ void ReleaseHighScoreMenuScreenButtons()
 				menuScreen[1].setAcceleration( 100, 2);
 				
 				GameState = AT_MENU;
-				ResetMenuButtonBobble();
-
+				//ResetMenuButtonBobble();
 				break;
-			case 2: // messages for how to obtain trophies
-				// this conditional statement has to be here b/c both buttons are checked simultaneously
-				if( trophies[0] == false ) // 100 000 points
+			case 12: // Game Center login and leaderboards
+				if( s3eIOSGameCenterAvailable() )
 				{
-					trophyString = "How to get Trophy: Get a high score of 100,000 points!";
-					strcpy( trophyCString, trophyString.c_str() );
-
-					trophyMessageSprite.setImage( trophyMessageImage[0] );
-					showTrophyMessage = true;
-
-					// flurry log trophy
-					if( hasFlurry )
-					{
-						char cstring[50] = "Pressed Trophy100k (no trophy)";
-						s3eFlurryLogEvent( cstring, false );
-					}
+					s3eIOSGameCenterAuthenticate( LoadLeaderboardCallback, NULL );
 				}
-				break;
-			case 3:
-				if( trophies[1] == false ) // 500,000 points
-				{
-					trophyString = "How to get Trophy: Get a high score of 500,000 points!";
-					strcpy( trophyCString, trophyString.c_str() );
-
-					trophyMessageSprite.setImage( trophyMessageImage[1] );
-					showTrophyMessage = true;
-
-					// flurry log trophy
-					if( hasFlurry )
-					{
-						char cstring[50] = "Pressed Trophy500k (no trophy)";
-						s3eFlurryLogEvent( cstring, false );
-					}
-				}
-				break;
-			case 4:
-				if( trophies[2] == false ) // rated app
-				{
-					trophyString = "How to get Trophy: Rate this App on the App Store!";
-					strcpy( trophyCString, trophyString.c_str() );
-
-					trophyMessageSprite.setImage( trophyMessageImage[2] );
-					showTrophyMessage = true;
-
-					// flurry log trophy
-					if( hasFlurry )
-					{
-						char cstring[50] = "Pressed TrophyRate (no trophy)";
-						s3eFlurryLogEvent( cstring, false );
-					}
-				}
-				break;
-			case 5:
-				if( trophies[3] == false ) // 1 million points
-				{
-					trophyString = "How to get Trophy: Get a high score of 1,000,000 points!";
-					strcpy( trophyCString, trophyString.c_str() );
-
-					trophyMessageSprite.setImage( trophyMessageImage[3] );
-					showTrophyMessage = true;
-
-					// flurry log trophy
-					if( hasFlurry )
-					{
-						char cstring[50] = "Pressed Trophy1mill (no trophy)";
-						s3eFlurryLogEvent( cstring, false );
-					}
-				}
-				break;
-			case 6:
-				if( trophies[4] == false ) // beat game
-				{
-					trophyString = "How to get Trophy: Beat the game!";
-					strcpy( trophyCString, trophyString.c_str() );
-
-					trophyMessageSprite.setImage( trophyMessageImage[4] );
-					showTrophyMessage = true;
-
-					// flurry log trophy
-					if( hasFlurry )
-					{
-						char cstring[50] = "Pressed TrophyFuzzyHero (no trophy)";
-						s3eFlurryLogEvent( cstring, false );
-					}
-				}
-				break;
-			case 7: // messages for trophies already obtained
-				if( trophies[0] == true ) // 100,000 points
-				{
-					trophyString = "Woo hoo! You got a high score of 100,000 points!";
-					strcpy( trophyCString, trophyString.c_str() );
-
-					trophyMessageSprite.setImage( trophyMessageImage[5] );
-					showTrophyMessage = true;
-
-					// flurry log trophy
-					if( hasFlurry )
-					{
-						char cstring[50] = "Pressed Trophy100k (YES trophy)";
-						s3eFlurryLogEvent( cstring, false );
-					}
-				}
-
-				
-				break;
-			case 8:
-				if( trophies[1] == true ) // 500,000 points
-				{
-					trophyString = "Insane! You got a high score of 500,000 points!!";
-					strcpy( trophyCString, trophyString.c_str() );
-
-					trophyMessageSprite.setImage( trophyMessageImage[6] );
-					showTrophyMessage = true;
-
-					// flurry log trophy
-					if( hasFlurry )
-					{
-						char cstring[50] = "Pressed Trophy500k (YES trophy)";
-						s3eFlurryLogEvent( cstring, false );
-					}
-				}
-				break;
-			case 9:
-				if( trophies[2] == true ) // rate app
-				{
-					trophyString = "You are a Fuzzy Reviewer! Thanks for rating our App!";
-					strcpy( trophyCString, trophyString.c_str() );
-
-					trophyMessageSprite.setImage( trophyMessageImage[7] );
-					showTrophyMessage = true;
-
-					// flurry log trophy
-					if( hasFlurry )
-					{
-						char cstring[50] = "Pressed TrophyRate (YES trophy)";
-						s3eFlurryLogEvent( cstring, false );
-					}
-				}
-				break;
-			case 10:
-				if( trophies[3] == true ) // 1 million points
-				{
-					trophyString = "You are a fuzzy Master!! You got a high score of 1,000,000 points!!!";
-					strcpy( trophyCString, trophyString.c_str() );
-
-					trophyMessageSprite.setImage( trophyMessageImage[8] );
-					showTrophyMessage = true;
-
-					// flurry log trophy
-					if( hasFlurry )
-					{
-						char cstring[50] = "Pressed Trophy1mill (YES trophy)";
-						s3eFlurryLogEvent( cstring, false );
-					}
-				}
-				break;
-			case 11:
-				if( trophies[4] == true ) // beat game
-				{
-					trophyString = "You are THE Fuzzy Hero! You have cleared the entire game!!!";
-					strcpy( trophyCString, trophyString.c_str() );
-
-					trophyMessageSprite.setImage( trophyMessageImage[9] );
-					showTrophyMessage = true;
-
-					// flurry log trophy
-					if( hasFlurry )
-					{
-						char cstring[50] = "Pressed TrophyFuzzyHero (YES trophy)";
-						s3eFlurryLogEvent( cstring, false );
-					}
-				}
+				//s3eIOSGameCenterAuthenticate(AuthenticationCallback, NULL);				
+				//s3eIOSGameCenterLeaderboardShowGUI("t_leaderboard01", S3E_IOSGAMECENTER_PLAYER_SCOPE_ALL_TIME);
 				break;
 			}
 		}		
@@ -20319,10 +20199,22 @@ void ReleaseMenuButtons()
 		}
 		*/
 	}
+	else if( menuScreen[0].button[1].pressed == true && limbo == false ) // pull down the high score menu screen
+	{
+		menuScreen[1].setStartingPosition( IwGxGetScreenWidth()/2, -IwGxGetScreenHeight()/2 );
+		menuScreen[1].setEndingPosition( IwGxGetScreenWidth()/2, IwGxGetScreenHeight()/2 );
+		menuScreen[1].setInterpolationTime( 500 );
+		menuScreen[1].setDeceleration( 100, -2);
+
+		GameState = AT_HIGH_SCORE_MENU_SCREEN;
+		pullHighScoreScreen = true; // this is needed for keeping high score screen rendering when going back to menu for transition-out
+	}
 
 	// Release all variables
 	menuScreen[0].button[0].initialPressed = false;
 	menuScreen[0].button[0].pressed = false;
+	menuScreen[0].button[1].initialPressed = false;
+	menuScreen[0].button[1].pressed = false;
 	
 } // end of ReleaseMenuButtons()
 
@@ -31022,6 +30914,74 @@ int32 HideIAD(void *systemData, void *userData)
 	return 0;
 }
 
+// Game Center
+const char* ErrorAsString(s3eIOSGameCenterError error)
+{
+    switch(error)
+    {
+        case S3E_IOSGAMECENTER_ERR_NONE:
+            return "NONE";
+        case S3E_IOSGAMECENTER_ERR_PARAM:
+            return "PARAM";
+        case S3E_IOSGAMECENTER_ERR_UNAUTHENTICATED:
+            return "UNAUTHENTICATED";
+        case S3E_IOSGAMECENTER_ERR_FRIENDS_NOT_LOADED:
+            return "FRIENDS_NOT_LOADED";
+        case S3E_IOSGAMECENTER_ERR_ALREADY_REG:
+            return "ALREADY_REG";
+        case S3E_IOSGAMECENTER_ERR_GAME_UNRECOGNISED:
+            return "GAME_UNRECOGNISED";
+        case S3E_IOSGAMECENTER_ERR_AUTHENTICATION_IN_PROGRESS:
+            return "AUTHENTICATION_IN_PROGRESS";
+        case S3E_IOSGAMECENTER_ERR_INVALID_CREDENTIALS:
+            return "INVALID_CREDENTIALS";
+        case S3E_IOSGAMECENTER_ERR_UNDERAGE:
+            return "UNDERAGE";
+        case S3E_IOSGAMECENTER_ERR_COMMUNICATIONS_FAILURE:
+            return "COMMUNICATIONS_FAILURE";
+        case S3E_IOSGAMECENTER_ERR_CANCELLED:
+            return "CANCELLED";
+        case S3E_IOSGAMECENTER_ERR_USER_DENIED:
+            return "DENIED";
+        case S3E_IOSGAMECENTER_ERR_INVALID_PLAYER:
+            return "INVALID_PLAYER";
+        case S3E_IOSGAMECENTER_ERR_SCORE_NOT_SET:
+            return "SCORE_NOT_SET";
+        case S3E_IOSGAMECENTER_ERR_PARENTAL_CONTROLS_BLOCKED:
+            return "PARENTAL_CONTROLS_BLOCKED";
+        case S3E_IOSGAMECENTER_ERR_INVALID_MATCH_REQUEST:
+            return "INVALID_MATCH_REQUEST";
+        case S3E_IOSGAMECENTER_ERR_DEVICE:
+        default:
+            return "DEVICE/UNKNOWN";
+    }
+}
+
+void AuthenticationCallback(s3eIOSGameCenterError* error, void* userData)
+{
+    if (*error != S3E_IOSGAMECENTER_ERR_NONE)
+    {
+		printf("Authentication Error: %s \n", ErrorAsString(*error));        
+    }
+	else
+	{
+		printf("Authentication Successful. \n");		
+	}
+}
+
+void LoadLeaderboardCallback(s3eIOSGameCenterError* error, void* userData)
+{
+	if (*error != S3E_IOSGAMECENTER_ERR_NONE)
+    {
+		printf("Authentication Error: %s \n", ErrorAsString(*error));        
+    }
+	else
+	{
+		printf("Loading Leaderboards... \n");
+		s3eIOSGameCenterLeaderboardShowGUI("t_leaderboard01", S3E_IOSGAMECENTER_PLAYER_SCOPE_ALL_TIME);
+	}
+}
+
 // QFI reset current multitasking variables
 void ResetMultitaskingCurrent()
 {
@@ -31702,6 +31662,8 @@ void LoadBackgroundAndOtherInit()
 	loadingIconSprite.setTotalFrames( 15 );
 	//loadingIconSprite.setPosition( IwGxGetScreenWidth() - 75 , IwGxGetScreenHeight() - 75 );
 	loadingIconSprite.setPosition( width * .84, height * .77 );
+
+	
 	
 	// LOAD BACKGROUND AND STARS
 	
@@ -31899,6 +31861,14 @@ void LoadMenuData()
 	fuzzyFactSprite.setPosition( width/2, height/2 );
 
 	menuScreen[0].Initialize( MenuScreen::MENU );DisplayLoading();
+	menuScreen[1].Initialize( MenuScreen::HIGH_SCORE );
+
+	// Authenticate game center
+	if( s3eIOSGameCenterAvailable() && gameCenterDidAttemptLoading == false )
+	{
+		s3eIOSGameCenterAuthenticate( AuthenticationCallback, NULL );
+		gameCenterDidAttemptLoading = true;
+	}
 	
 	int32 heapUsed2 = s3eMemoryGetInt(S3E_MEMORY_USED); // Free memory minus heap size
 	printf("Finished Loading Menu data. Memory loaded was %d \n", heapUsed2 - heapUsed );
